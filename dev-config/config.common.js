@@ -1,11 +1,5 @@
 const path = require('path');
-const rootPath = path.join(__dirname, "../");
-/**
- * true 开发环境
- * false 线上环境
- */
-const is_DEV = process.env.NODE_ENV === 'development';
-
+const webpack = require("webpack");
 // 插件
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -13,6 +7,12 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 // const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+const rootPath = path.join(__dirname, "../");
+/**
+ * true 开发环境
+ * false 线上环境
+ */
+const is_DEV = process.env.NODE_ENV === 'development';
 
 
 const styleLoadersConfig = [
@@ -32,13 +32,19 @@ module.exports = {
     entry: {
         app: path.join(rootPath, 'src/index.js'),
     },
+
     output: {
-        filename: "[name].[contenthash:16].js",
+        filename: is_DEV ? '[name].[hash].js' : "[name].[contenthash:16].js",
     },
     resolve: {
         // 配置扩展名解析默认值
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     },
+    devtool: 'inline-source-map',
+    devServer: {
+        hot: true
+    },
+
     module: {
         rules: [
             {
@@ -84,11 +90,11 @@ module.exports = {
             {
                 test: /\.(png|jpe?g|gif)$/i,
                 use: [
-                  {
-                    loader: 'file-loader',
-                  },
+                    {
+                        loader: 'file-loader',
+                    },
                 ],
-              },
+            },
         ]
     },
     optimization: {
@@ -113,7 +119,7 @@ module.exports = {
                     //     console.log(module, chunks, cacheGroupKey);
                     //     return "name112"
                     // },
-                    name:"verdors",
+                    name: "verdors",
                     priority: -10,
                     minChunks: 1,
                 },
@@ -130,6 +136,7 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin(),
+        is_DEV ? new webpack.HotModuleReplacementPlugin() : undefined,
         new MiniCssExtractPlugin({
             filename: '[name].[contenthash:16].css',
             // chunkFilename: '[id].[contenthash].css',
