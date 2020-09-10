@@ -44,13 +44,11 @@ module.exports = {
         runtimeChunk: {
             name: 'runtime'
         },
-        moduleIds: "named",
-        chunkIds: "named",
         splitChunks: {
             chunks: 'all',
             minSize: 0,
             maxSize: 0,
-            minChunks: 1,
+            minChunks: 2,
             maxAsyncRequests: 5,
             maxInitialRequests: 10,
             automaticNameDelimiter: '~',
@@ -59,13 +57,15 @@ module.exports = {
                 vendors: {
                     test: /[\\/]node_modules[\\/]/,
                     filename: "vendor.[contenthash:16].js",
-                    priority: -10
+                    priority: -10,
+                    minChunks: 1,
                 },
                 commons: {
                     test: /[\\/]node_modules[\\/](react|react-dom)/,
                     filename: "commons.[contenthash:16].js",
-                    priority: 0
-                },
+                    priority: 0,
+                    minChunks: 1,
+                }
             }
         }
     },
