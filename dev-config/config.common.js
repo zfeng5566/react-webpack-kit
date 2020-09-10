@@ -9,13 +9,31 @@ const is_DEV = process.env.NODE_ENV === 'development';
 // 插件
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+// 官网不推荐使用
+// const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+
+
+const styleLoadersConfig = [
+    {
+        loader: MiniCssExtractPlugin.loader,
+        options: {
+            publicPath: "static/css/"
+        }
+    },
+    {
+        loader: "css-loader" // 将 CSS 转化成 CommonJS 模块
+    }
+]
+
 module.exports = {
     mode: is_DEV ? 'development' : 'production',
     entry: {
         app: path.join(rootPath, 'src/index.js'),
     },
     output: {
-        filename: "[name].[contenthash:16].js"
+        filename: "[name].[contenthash:16].js",
     },
     resolve: {
         // 配置扩展名解析默认值
@@ -37,13 +55,47 @@ module.exports = {
                         loader: "babel-loader"
                     }
                 ]
-            }
+            },
+            {
+                test: /\.css$/,
+                use: styleLoadersConfig
+
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    ...styleLoadersConfig,
+                    {
+                        loader: "sass-loader" // 将 Sass 编译成 CSS
+                    }
+                ]
+
+            },
+            {
+                test: /\.less$/,
+                use: [
+                    ...styleLoadersConfig,
+                    {
+                        loader: "less-loader" // 将 Sass 编译成 CSS
+                    }
+                ]
+
+            },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                use: [
+                  {
+                    loader: 'file-loader',
+                  },
+                ],
+              },
         ]
     },
     optimization: {
         runtimeChunk: {
             name: 'runtime'
         },
+
         splitChunks: {
             chunks: 'all',
             minSize: 0,
@@ -56,13 +108,18 @@ module.exports = {
             cacheGroups: {
                 vendors: {
                     test: /[\\/]node_modules[\\/]/,
-                    filename: "vendor.[contenthash:16].js",
+                    // filename: "vendor.[contenthash:16].[ext]",
+                    // name(module, chunks, cacheGroupKey) {
+                    //     console.log(module, chunks, cacheGroupKey);
+                    //     return "name112"
+                    // },
+                    name:"verdors",
                     priority: -10,
                     minChunks: 1,
                 },
                 commons: {
                     test: /[\\/]node_modules[\\/](react|react-dom)/,
-                    filename: "commons.[contenthash:16].js",
+                    name: "commons",
                     priority: 0,
                     minChunks: 1,
                 }
@@ -72,7 +129,11 @@ module.exports = {
 
     plugins: [
         new CleanWebpackPlugin(),
-        new HtmlWebpackPlugin()
+        new HtmlWebpackPlugin(),
+        new MiniCssExtractPlugin({
+            filename: '[name].[contenthash:16].css',
+            // chunkFilename: '[id].[contenthash].css',
+        }),
 
     ]
 }
